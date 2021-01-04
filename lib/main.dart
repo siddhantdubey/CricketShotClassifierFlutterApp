@@ -1,12 +1,12 @@
 import 'dart:convert';
-
+import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
-
 import 'package:path/path.dart';
-import 'package:async/async.dart';
+
+final picker = ImagePicker();
 
 String txt = "";
 String txt1 = "Upload or take an image to figure out what type of cricket shot it is";
@@ -28,8 +28,8 @@ class _MyAppState extends State<MyApp> {
 
   // The fuction which will upload the image as a file
   void upload(File imageFile) async {
-    var stream =
-    new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
+    var stream = new http.ByteStream(imageFile.openRead());
+    stream.cast();
     var length = await imageFile.length();
 
     String base =
@@ -74,26 +74,29 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-
-  void lol(int a) async {
+void lol(int a) async {
     txt1 = "";
     setState(() {
 
     });
     debugPrint("Lol Activated");
     if (a == 0){
-      img = await ImagePicker.pickImage(source: ImageSource.camera);
+      final pickedFile = await picker.getImage(source: ImageSource.camera, );
+      File compressedFile = await FlutterNativeImage.compressImage(pickedFile.path,
+        quality: 50,);
+      img = File(compressedFile.path);
     }
     else{
-      img = await ImagePicker.pickImage(source: ImageSource.gallery);
+      final pickedFile = await picker.getImage(source: ImageSource.gallery, );
+      File compressedFile = await FlutterNativeImage.compressImage(pickedFile.path,
+        quality: 75,);
+      img = File(compressedFile.path);
     }
-
-    txt = "Analysing...";
+    txt = "Analyzing...";
     debugPrint(img.toString());
     upload(img);
     setState(() {});
   }
-
 
 
   @override
